@@ -1,60 +1,31 @@
 import Company from "../models/company.model.js";
 import Student from "../models/student.model.js";
 
-// Create a company
-export const createCompany = async (req, res) => {
+export const addCompany = async (req, res) => {
   try {
-    const company = new Company(req.body);
-    await company.save();
-    res.status(201).json(company);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const { name, role, type, students } = req.body;
 
-// Get all companies
-export const getCompanies = async (req, res) => {
-  try {
-    const companies = await Company.find().populate("shortlisted.finalSelected", "name rollNo department aggregateCGPA");
-    res.json(companies);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const newCompany = new Company({ name, role, type, students });
 
-// Get single company
-export const getCompany = async (req, res) => {
-  try {
-    const company = await Company.findById(req.params.id).populate("shortlisted.finalSelected", "name rollNo department aggregateCGPA");
-    if (!company) return res.status(404).json({ error: "Company not found" });
-    res.json(company);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    await newCompany.save();
+    console.log(students);
 
-// Add student to a stage (registered, OA, interview, final)
-export const addStudentToStage = async (req, res) => {
-  try {
-    const { companyId, stage } = req.params;
-    const { studentId } = req.body;
-
-    if (!["registered", "onlineAssessment", "interview", "finalSelected"].includes(stage)) {
-      return res.status(400).json({ error: "Invalid stage" });
+    for (let rollNo of students) {
+      await Student.findOneAndUpdate(
+        { rollNo },
+        { company: newCompany._id },
+        { new: true }
+      );
     }
 
-    const company = await Company.findById(companyId);
-    if (!company) return res.status(404).json({ error: "Company not found" });
-
-    // Check student exists
-    const student = await Student.findById(studentId);
-    if (!student) return res.status(404).json({ error: "Student not found" });
-
-    company.shortlisted[stage].push(studentId);
-    await company.save();
-
-    res.json({ message: `Student added to ${stage}`, company });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(201).json({
+      message: "Company added successfully",
+      company: newCompany,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error while adding company",
+      error: error.message,
+    });
   }
 };

@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart,
   Line,
@@ -11,34 +11,42 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
-} from "recharts"
+} from "recharts";
+
+interface Company {
+  _id: string;
+  name: string;
+  role: string;
+  type: string;
+}
 
 interface Student {
-  _id: string
-  name: string
-  rollNo: string
-  department: string
-  aggregateCGPA: number
-  semesterCGPA: { semester: number; cgpa: number }[]
+  _id: string;
+  name: string;
+  rollNo: string;
+  department: string;
+  aggregateCGPA: number;
+  semesterCGPA: { semester: number; cgpa: number }[];
+  company?: Company;
 }
 
 export default function StudentDetail() {
-  const { id } = useParams()
-  const [student, setStudent] = useState<Student | null>(null)
+  const { id } = useParams();
+  const [student, setStudent] = useState<Student | null>(null);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
     fetch(`http://localhost:5000/api/students/${id}`)
       .then((res) => res.json())
-      .then((data) => setStudent(data))
-  }, [id])
+      .then((data) => setStudent(data));
+  }, [id]);
 
   if (!student) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white bg-black">
         Loading...
       </div>
-    )
+    );
   }
 
   return (
@@ -51,12 +59,36 @@ export default function StudentDetail() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-gray-200">
-          <p><strong>Name:</strong> {student.name}</p>
-          <p><strong>Roll No:</strong> {student.rollNo}</p>
-          <p><strong>Department:</strong> {student.department}</p>
-          <p><strong>Aggregate CGPA:</strong> 
-            <span className="ml-2 text-green-400 font-semibold">{student.aggregateCGPA}</span>
+          <p>
+            <strong>Name:</strong> {student.name}
           </p>
+          <p>
+            <strong>Roll No:</strong> {student.rollNo}
+          </p>
+          <p>
+            <strong>Department:</strong> {student.department}
+          </p>
+          <p>
+            <strong>Aggregate CGPA:</strong>
+            <span className="ml-2 text-green-400 font-semibold">
+              {student.aggregateCGPA}
+            </span>
+          </p>
+          {student?.company && (
+            <div className="bg-slate-700 text-white text-center flex flex-col flex-center justify-center p-3 mt-4 rounded-4xl text-xl md:bg-gradient-to-br from-gray-900 to-gray-800 md:text-left md:w-[30%]">
+              <h1 className="font-bold font-sans bg-amber-200 rounded-t-3xl p-2 mb-4 text-center text-slate-900 text-sm xl:text-xl">Congratulations !! Hurray</h1>
+              <p>
+                <strong className="text-red-600">Company:</strong> {student.company.name}{" "}
+              </p>
+              <p>
+                <strong className="text-red-600">Role:</strong> {student.company.role}
+              </p>
+              <p>
+                {" "}
+                <strong className="text-red-600">Type:</strong> {student.company.type}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -74,10 +106,20 @@ export default function StudentDetail() {
               <XAxis dataKey="semester" stroke="#aaa" />
               <YAxis domain={[0, 10]} stroke="#aaa" />
               <Tooltip
-                contentStyle={{ backgroundColor: "#111", border: "1px solid #444", borderRadius: "8px" }}
+                contentStyle={{
+                  backgroundColor: "#111",
+                  border: "1px solid #444",
+                  borderRadius: "8px",
+                }}
                 labelStyle={{ color: "#fff" }}
               />
-              <Line type="monotone" dataKey="cgpa" stroke="red" strokeWidth={3} dot={{ r: 5, fill: "#22c55e" }} />
+              <Line
+                type="monotone"
+                dataKey="cgpa"
+                stroke="red"
+                strokeWidth={3}
+                dot={{ r: 5, fill: "#22c55e" }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -86,9 +128,14 @@ export default function StudentDetail() {
       {/* Semester Result Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {student.semesterWiseCGPA.map((sem) => (
-          <Card key={sem.semester} className="bg-gray-800 border-gray-700 shadow-md">
+          <Card
+            key={sem.semester}
+            className="bg-gray-800 border-gray-700 shadow-md"
+          >
             <CardHeader>
-              <CardTitle className="text-white">Semester {sem.semester}</CardTitle>
+              <CardTitle className="text-white">
+                Semester {sem.semester}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center">
               {/* Circular meter using Tailwind + relative divs */}
@@ -124,5 +171,5 @@ export default function StudentDetail() {
         ))}
       </div>
     </div>
-  )
+  );
 }

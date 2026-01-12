@@ -6,16 +6,15 @@ const companySchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ["2M Internship", "6M+PPO", "6M+FTE", "FTE"],
-    required: true
+    required: true,
   },
-  // Array of student IDs grouped by status
-  shortlisted: {
-    registered: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
-    onlineAssessment: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
-    interview: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
-    finalSelected: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }]
-  },
-  createdAt: { type: Date, default: Date.now }
+  students: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  createdAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.model("Company", companySchema);
