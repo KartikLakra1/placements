@@ -29,3 +29,18 @@ export const addCompany = async (req, res) => {
     });
   }
 };
+
+export const getCompanies = async (req, res) => {
+  try {
+    const companies = await Company.find();
+    return res.status(200).json({
+      message: "Companies fetched successfully",
+      companies,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error while fetching companies",
+      error: error.message,
+    });
+  }
+};
